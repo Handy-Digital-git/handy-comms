@@ -1,26 +1,117 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Theme tokens */
+:root,
+.light {
+  /* Light theme tokens */
+  --bg: #ffffff;
+  --card: #f3f4f6;
+  --card2: #e8eaed;
+  --text: #0f172a;
+  --muted: #475569;
+  --muted2: #64748b;
+  --border: #e2e8f0;
+  --accent: #6dd400;
+  --icon-bg: #0f172a;
+  --icon-fg: #ffffff;
+  --danger: #e11d48;
 }
 
+.dark {
+  /* Dark theme tokens */
+  --bg: #000000;
+  --card: #1a1a1a;
+  --card2: #161616;
+  --text: #ffffff;
+  --muted: #bdbdbd;
+  --muted2: #9a9a9a;
+  --border: #242424;
+  --accent: #c7ff3d;
+  --icon-bg: #ffffff;
+  --icon-fg: #000000;
+  --danger: #ff4d4d;
+}
+
+/* Map tokens to Tailwind design tokens */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-card2: var(--card2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-muted2: var(--muted2);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-icon-bg: var(--icon-bg);
+  --color-icon-fg: var(--icon-fg);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-instrument-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Subtle UI primitives */
+
+/* Helpers use CSS variables directly to avoid issues if utilities are purged */
+.card {
+  border-radius: 0.75rem; /* rounded-xl */
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+}
+
+.card-muted {
+  border-radius: 0.75rem;
+  background-color: var(--card2);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  padding: 0.125rem 0.625rem; /* py-0.5 px-2.5 */
+  font-size: 0.75rem; /* text-xs */
+  color: var(--muted);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background-color: var(--card2);
+  padding: 0.125rem 0.5rem; /* py-0.5 px-2 */
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.stat {
+  @apply text-2xl font-semibold text-text;
+}
+
+.muted {
+  @apply text-sm text-muted2;
+}
+
+/* Scrollbar (WebKit) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
 }
