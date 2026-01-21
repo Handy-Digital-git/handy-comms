@@ -1,7 +1,14 @@
+import { createClient } from "@/lib/supabase/server";
+
 export default async function DashboardPage() {
-  // Static demo data for now
+  const supabase = await createClient();
+  const { count: totalTickets } = await supabase
+    .from("contact_requests")
+    .select("*", { count: "exact", head: true });
+
+  // Static demo data for now (mix of dynamic + placeholder)
   const stats = [
-    { label: "Total Tickets", value: 245, change: "+12%" },
+    { label: "Total Tickets", value: totalTickets ?? 0, change: "+12%" },
     { label: "Resolved Tickets", value: 180, change: "+15%" },
     { label: "Pending Tickets", value: 45, change: "-9%" },
     { label: "Response Time", value: "2.4 hrs", change: "10x faster" },

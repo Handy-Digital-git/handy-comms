@@ -52,7 +52,7 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="mb-8">
             <div className="flex items-center gap-2 font-semibold text-lg">
-              <span className="inline-block h-8 w-8 rounded bg-black text-white flex items-center justify-center">
+              <span className="inline-flex h-8 w-8 rounded bg-black text-white items-center justify-center">
                 HD
               </span>
               Handy Comms

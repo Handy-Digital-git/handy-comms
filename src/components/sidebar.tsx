@@ -2,18 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  TicketCheck,
-  Settings,
-  LogOut,
-  LifeBuoy,
-} from "lucide-react";
+import { LayoutDashboard, Ticket } from "lucide-react";
 
 const nav = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Tickets", href: "/tickets", icon: TicketCheck },
-  { name: "Admin", href: "/admin", icon: Settings },
+  { name: "IT Tickets", href: "/tickets", icon: Ticket },
+  { name: "Admin Tickets", href: "/admin", icon: Ticket },
 ];
 
 export function Sidebar({
@@ -29,7 +23,7 @@ export function Sidebar({
     <aside
       className={`h-screen sticky top-0 border-r border-border bg-card ${
         collapsed ? "w-21" : "w-64"
-      } transition-[width] duration-300`}
+      } transition-[width] duration-300 flex flex-col`}
     >
       <div className={`flex h-16 items-center px-4 ${collapsed ? "justify-center" : "justify-start"}`}>
         <Link href="/dashboard" className={`flex items-center gap-2 ${collapsed ? "justify-center" : ""}`}>
@@ -54,7 +48,7 @@ export function Sidebar({
               {collapsed && (
                 <span
                   role="tooltip"
-                  className="pointer-events-none absolute left-full top-1/2 z-10 -translate-y-1/2 translate-x-1 opacity-0 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-xs text-text shadow transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-2 ml-2"
+                  className="pointer-events-none absolute left-full top-1/2 z-10 -translate-y-1/2 translate-x-2 opacity-0 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-xs text-text shadow transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-3 ml-3"
                 >
                   {item.name}
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 -ml-1.5 h-3 w-3 rotate-45 bg-card border-l border-t border-border" />
@@ -64,6 +58,9 @@ export function Sidebar({
           );
         })}
       </nav>
+
+      {/* Bottom items (empty for now) */}
+      <div className="mt-auto px-2 pb-3" />
     </aside>
   );
 }
