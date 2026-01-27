@@ -2,15 +2,29 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { count: totalTickets } = await supabase
+  // Total tickets
+  const { count: totalTickets } = (await supabase
     .from("contact_requests")
-    .select("*", { count: "exact", head: true });
+    .select("*", { count: "exact", head: true })) as any;
+
+  // Resolved tickets (treat both "Resolved" and "Closed" as resolved)
+  const { count: resolvedTickets } = (await supabase
+    .from("contact_requests")
+    .select("*", { count: "exact", head: true })
+    .in("status", ["Resolved", "Closed"])) as any;
+
+  // Pending tickets = open/unresolved (status Open or NULL/empty)
+  const { count: openTickets } = (await supabase
+    .from("contact_requests")
+    .select("*", { count: "exact", head: true })
+    .or("status.is.null,status.eq.Open,status.eq.")
+  ) as any;
 
   // Static demo data for now (mix of dynamic + placeholder)
   const stats = [
     { label: "Total Tickets", value: totalTickets ?? 0, change: "+12%" },
-    { label: "Resolved Tickets", value: 180, change: "+15%" },
-    { label: "Pending Tickets", value: 45, change: "-9%" },
+    { label: "Resolved Tickets", value: resolvedTickets ?? 0, change: "+15%" },
+    { label: "Pending Tickets", value: openTickets ?? 0, change: "-9%" },
     { label: "Response Time", value: "2.4 hrs", change: "10x faster" },
   ];
 

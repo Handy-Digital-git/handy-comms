@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
 
   const supabase = createServerClient(
@@ -22,13 +22,15 @@ export async function middleware(req: NextRequest) {
   const { data } = await supabase.auth.getUser();
   const isLoggedIn = !!data.user;
 
-  const isProtected = req.nextUrl.pathname.startsWith("/dashboard")
-    || req.nextUrl.pathname.startsWith("/tickets")
-    || req.nextUrl.pathname.startsWith("/admin")
-    || req.nextUrl.pathname.startsWith("/settings");
+  const isProtected =
+    req.nextUrl.pathname.startsWith("/dashboard") ||
+    req.nextUrl.pathname.startsWith("/tickets") ||
+    req.nextUrl.pathname.startsWith("/admin") ||
+    req.nextUrl.pathname.startsWith("/settings");
 
-  const isAuthPage = req.nextUrl.pathname.startsWith("/login")
-    || req.nextUrl.pathname.startsWith("/signup");
+  const isAuthPage =
+    req.nextUrl.pathname.startsWith("/login") ||
+    req.nextUrl.pathname.startsWith("/signup");
 
   if (isProtected && !isLoggedIn) {
     const url = req.nextUrl.clone();
@@ -47,5 +49,12 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/tickets/:path*", "/admin/:path*", "/settings/:path*", "/login", "/signup"],
+  matcher: [
+    "/dashboard/:path*",
+    "/tickets/:path*",
+    "/admin/:path*",
+    "/settings/:path*",
+    "/login",
+    "/signup",
+  ],
 };

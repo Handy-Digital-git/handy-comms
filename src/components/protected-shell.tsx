@@ -14,7 +14,7 @@ export function ProtectedShell({
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="grid min-h-screen bg-bg text-text" style={{ gridTemplateColumns: "auto 1fr" }}>
+    <div className="grid min-h-screen bg-bg" style={{ gridTemplateColumns: "auto 1fr" }}>
       <Sidebar signOutAction={signOutAction} collapsed={collapsed} />
       <div className="flex min-w-0 flex-col">
         <Topbar signOutAction={signOutAction} onToggleSidebarAction={() => setCollapsed((v) => !v)} collapsed={collapsed} />

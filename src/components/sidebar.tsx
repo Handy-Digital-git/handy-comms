@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ticket } from "lucide-react";
+import { LayoutDashboard, Wrench, Shield, Banknote } from "lucide-react";
 
 const nav = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "IT Tickets", href: "/tickets", icon: Ticket },
-  { name: "Admin Tickets", href: "/admin", icon: Ticket },
+  { name: "IT Tickets", href: "/tickets", icon: Wrench },
+  { name: "Admin Tickets", href: "/admin", icon: Shield },
+  { name: "Bank Transfers", href: "/bank-transfers", icon: Banknote },
 ];
 
 export function Sidebar({
@@ -25,8 +26,8 @@ export function Sidebar({
         collapsed ? "w-21" : "w-64"
       } transition-[width] duration-300 flex flex-col`}
     >
-      <div className={`flex h-16 items-center px-4 ${collapsed ? "justify-center" : "justify-start"}`}>
-        <Link href="/dashboard" className={`flex items-center gap-2 ${collapsed ? "justify-center" : ""}`}>
+      <div className={`flex h-16 items-center justify-center px-4`}>
+        <Link href="/dashboard" className={`flex items-center gap-2 justify-center`}>
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-icon-bg text-icon-fg font-semibold">HC</span>
           {!collapsed && <span className="font-semibold">Handy Comms</span>}
         </Link>

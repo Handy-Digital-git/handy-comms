@@ -52,7 +52,6 @@
 
 body {
   background: var(--bg);
-  color: var(--text);
   font-family: var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
@@ -78,21 +77,17 @@ body {
   align-items: center;
   gap: 0.25rem;
   border-radius: 999px;
-  border: 1px solid var(--border);
   padding: 0.125rem 0.625rem; /* py-0.5 px-2.5 */
   font-size: 0.75rem; /* text-xs */
-  color: var(--muted);
 }
 
 .tag {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background-color: var(--card2);
   padding: 0.125rem 0.5rem; /* py-0.5 px-2 */
   font-size: 10px;
   font-weight: 500;
-  color: var(--muted);
 }
 
 .stat {
@@ -115,3 +110,11 @@ body {
 *::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* Tailwind v4 safelist: ensure these utilities are always available even if the scanner misses TSX usage */
+/* Safelist a few common text colors (each rule applies one color to avoid @apply conflicts) */
+.tw-safelist-blue-600 { @apply text-blue-600; display: none; }
+.tw-safelist-blue-500 { @apply text-blue-500; display: none; }
+.tw-safelist-green-600 { @apply text-green-600; display: none; }
+.tw-safelist-indigo-600 { @apply text-indigo-600; display: none; }
+.tw-safelist-violet-600 { @apply text-violet-600; display: none; }

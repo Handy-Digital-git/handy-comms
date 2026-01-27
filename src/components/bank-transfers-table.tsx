@@ -1,0 +1,243 @@
+"use client";
+
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+
+export type BankTransferRow = {
+  ticket_no: number | null;
+  submitted_by_name: string | null;
+  submitted_by_email: string | null;
+  phone: string | null;
+  // Bank-specific fields
+  bank_customer_name?: string | null;
+  bank_account_number?: string | null;
+  bank_sort_code?: string | null;
+  bank_amount?: string | number | null;
+  bank_esb_amount?: string | number | null;
+  amount_to_transfer?: string | number | null;
+  // Optional status for updates
+  status?: string | null;
+};
+
+function val(s: string | number | null | undefined): string {
+  if (s == null) return "N/A";
+  const str = String(s).trim();
+  return str ? str : "N/A";
+}
+
+function formatTicketNo(n: number | null): string {
+  if (n == null || isNaN(n as any)) return "N/A";
+  if (n < 10000) return `#${String(n).padStart(4, "0")}`;
+  return `#${n}`;
+}
+
+function formatPhone(phone: string | null | undefined): string {
+  const raw = val(phone);
+  if (raw === "N/A") return raw;
+  let p = String(phone!).replace(/[^\d+]/g, "");
+  if (p.startsWith("+44")) return p;
+  if (p.startsWith("44")) return "+" + p;
+  if (p.startsWith("0")) return "+44" + p.slice(1);
+  if (p.startsWith("+")) return p;
+  return "+44" + p;
+}
+
+function money(x: string | number | null | undefined): string {
+  if (x == null) return "N/A";
+  const n = Number(x);
+  if (!isFinite(n)) return val(x as any);
+  return `£${n.toFixed(2)}`;
+}
+
+// Bank transfers have a simplified workflow
+export type TicketStatus = "Pending" | "Sent";
+
+function BulkStatusMenu({ disabled, onSelect, saving }: { disabled: boolean; onSelect: (s: TicketStatus) => void; saving: boolean }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const options: TicketStatus[] = ["Pending", "Sent"];
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((v) => !v)}
+        className={[
+          "inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm",
+          disabled ? "border-border bg-card text-muted opacity-60" : "border-border bg-card hover:bg-card2",
+        ].join(" ")}
+      >
+        <span>Change status</span>
+        {saving ? <span className="animate-pulse text-muted">…</span> : <span>▾</span>}
+      </button>
+      {open && (
+        <div className="absolute right-0 z-50 mt-2 w-48 rounded-md border border-border bg-bg shadow-lg">
+          <ul className="py-1">
+            {options.map((opt) => (
+              <li key={opt}>
+                <button
+                  type="button"
+                  className="w-full text-left px-3 py-2.5 text-sm hover:bg-card2"
+                  onClick={() => {
+                    onSelect(opt);
+                    setOpen(false);
+                  }}
+                >
+                  {opt}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function BankTransfersTable({ items }: { items: BankTransferRow[] }) {
+  const [rows, setRows] = useState<BankTransferRow[]>(items);
+  useEffect(() => setRows(items), [items]);
+
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const selectableIds = useMemo(
+    () => rows.map((r) => r.ticket_no).filter((n): n is number => typeof n === "number"),
+    [rows]
+  );
+  const allSelected = selected.size > 0 && selectableIds.every((id) => selected.has(id));
+  const someSelected = selected.size > 0 && !allSelected;
+
+  const [saving, setSaving] = useState(false);
+  const onBulkChange = async (next: TicketStatus) => {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    try {
+      setSaving(true);
+      const res = await fetch("/api/tickets/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticketNos: ids, status: next }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || "Failed to update status");
+      }
+      setRows((prev) => prev.map((r) => (r.ticket_no != null && selected.has(r.ticket_no) ? { ...r, status: next } : r)));
+      setSelected(new Set());
+    } catch (e: any) {
+      console.error(e);
+      alert(e?.message ?? "Failed to update status");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="w-full rounded-xl border border-border bg-bg shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-4 py-3">
+        <div className="text-sm text-muted">{selected.size} selected</div>
+        <BulkStatusMenu disabled={selected.size === 0 || saving} saving={saving} onSelect={onBulkChange} />
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full table-auto text-left text-[13px]">
+          <thead className="bg-(--accent)/10 text-accent">
+            <tr className="border-b border-(--accent)/20">
+              <th className="px-4 py-3">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-accent"
+                  aria-label="Select all"
+                  checked={allSelected}
+                  ref={(el) => {
+                    if (el) el.indeterminate = someSelected;
+                  }}
+                  onChange={(e) => {
+                    if (e.currentTarget.checked) setSelected(new Set(selectableIds));
+                    else setSelected(new Set());
+                  }}
+                />
+              </th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Ticket Number</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Name</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Email</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Phone</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Customer Name</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Acc Number</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Sort Code</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Amount</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">ESB Amount</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Transfer</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((t, i) => {
+              const idNum = typeof t.ticket_no === "number" ? t.ticket_no : null;
+              const isChecked = idNum != null && selected.has(idNum);
+              const st = (t.status ?? "Pending").toString();
+              return (
+                <Fragment key={`${t.ticket_no ?? i}`}>
+                  <tr className="border-t border-border hover:bg-card2/40">
+                    <td className="px-4 py-2 align-middle">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-accent"
+                        aria-label={`Select ${t.ticket_no ?? i}`}
+                        checked={isChecked}
+                        disabled={idNum == null}
+                        onChange={(e) => {
+                          if (idNum == null) return;
+                          const checked = (e.currentTarget as HTMLInputElement).checked;
+                          setSelected((prev) => {
+                            const next = new Set(prev);
+                            if (checked) next.add(idNum);
+                            else next.delete(idNum);
+                            return next;
+                          });
+                        }}
+                      />
+                    </td>
+                    <td className="px-2 py-2 align-middle">{formatTicketNo(t.ticket_no)}</td>
+                    <td className="px-2 py-2 align-middle truncate">{val(t.submitted_by_name)}</td>
+                    <td className="px-2 py-2 align-middle text-muted truncate">{val(t.submitted_by_email)}</td>
+                    <td className="px-2 py-2 align-middle text-muted truncate">{formatPhone(t.phone)}</td>
+                    <td className="px-2 py-2 align-middle truncate">{val(t.bank_customer_name)}</td>
+                    <td className="px-2 py-2 align-middle text-muted truncate">{val(t.bank_account_number)}</td>
+                    <td className="px-2 py-2 align-middle text-muted truncate">{val(t.bank_sort_code)}</td>
+                    <td className="px-2 py-2 align-middle">{money(t.bank_amount)}</td>
+                    <td className="px-2 py-2 align-middle">{money(t.bank_esb_amount)}</td>
+                    <td className="px-2 py-2 align-middle">{money(t.amount_to_transfer)}</td>
+                    <td className="px-2 py-2 align-middle">
+                      <span
+                        className="badge border"
+                        style={{
+                          backgroundColor: st === "Sent" ? "#F0FDF4" : "#FFFBEB",
+                          borderColor: st === "Sent" ? "#BBF7D0" : "#FDE68A",
+                          color: st === "Sent" ? "#166534" : "#92400E",
+                        }}
+                      >
+                        <span
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{ backgroundColor: st === "Sent" ? "#22C55E" : "#F59E0B" }}
+                        />
+                        {st}
+                      </span>
+                    </td>
+                  </tr>
+                </Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

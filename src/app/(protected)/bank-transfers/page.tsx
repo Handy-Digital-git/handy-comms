@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import TicketsTable from "@/components/tickets-table";
+import BankTransfersTable from "@/components/bank-transfers-table";
 import { classifyPriority } from "@/lib/priority";
 
 type ContactRequest = {
@@ -18,6 +18,13 @@ type ContactRequest = {
   reason: string | null;
   description?: string | null;
   screenshot_urls?: string | null;
+  // bank-specific fields
+  bank_customer_name?: string | null;
+  bank_account_number?: string | null;
+  bank_sort_code?: string | null;
+  bank_amount?: string | number | null;
+  bank_esb_amount?: string | number | null;
+  amount_to_transfer?: string | number | null;
 };
 
 function formatTicketNo(n: number | null): string {
@@ -95,13 +102,13 @@ function formatCreated(iso: string | null | undefined): string {
   return `${dd}-${mm}-${yyyy} ${hh}:${min}`;
 }
 
-export default async function AdminTicketsPage() {
+export default async function BankTransfersPage() {
   const supabase = await createClient();
-  const selectCols = "ticket_no, submitted_by_name, submitted_by_email, phone, app, page, prefix, status, priority, created_at, reason, description, screenshot_urls";
+  const selectCols = "ticket_no, submitted_by_name, submitted_by_email, phone, app, page, prefix, status, priority, created_at, reason, description, screenshot_urls, bank_customer_name, bank_account_number, bank_sort_code, bank_amount, bank_esb_amount, amount_to_transfer";
   const { data, error } = await supabase
     .from("contact_requests")
     .select(selectCols)
-    .in("reason", ["Admin", "admin", "ADMIN"]) // be tolerant of casing
+    .in("reason", ["Bank", "bank", "BANK"]) // tolerant casing
     .order("created_at", { ascending: false })
     .limit(200);
 
@@ -128,7 +135,7 @@ export default async function AdminTicketsPage() {
             .eq("ticket_no", r.ticket_no)
             .is("priority", null);
         } catch (e) {
-          // best-effort; ignore errors to not block page render
+          // ignore errors
         }
       }
     })
@@ -138,25 +145,25 @@ export default async function AdminTicketsPage() {
   const { count: totalTickets } = (await supabase
     .from("contact_requests")
     .select("*", { count: "exact", head: true })) as any;
-  const { count: totalAdmin } = (await supabase
+  const { count: totalBank } = (await supabase
     .from("contact_requests")
     .select("*", { count: "exact", head: true })
-    .in("reason", ["Admin", "admin", "ADMIN"])) as any;
+    .in("reason", ["Bank", "bank", "BANK"])) as any;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Admin Tickets</h1>
+        <h1 className="text-2xl font-semibold">Bank Transfers</h1>
       </div>
 
       {items.length === 0 && (
         <div className="card-muted px-4 py-3 text-sm text-muted">
-          <div>No Admin tickets found.</div>
-          <div className="mt-1">Debug — total: {totalTickets ?? 0}, Admin exact: {totalAdmin ?? 0}{error ? `, error: ${error.message}` : ""}</div>
+          <div>No Bank Transfer tickets found.</div>
+          <div className="mt-1">Debug — total: {totalTickets ?? 0}, Bank exact: {totalBank ?? 0}{error ? `, error: ${error.message}` : ""}</div>
         </div>
       )}
 
-      <TicketsTable items={out as any} />
+      <BankTransfersTable items={out as any} />
     </div>
   );
 }
