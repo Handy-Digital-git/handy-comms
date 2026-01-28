@@ -21,7 +21,6 @@ export default function NotificationsManager() {
   const [role, setRole] = useState("Admin");
   const [enabled, setEnabled] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [testRole, setTestRole] = useState<"Admin" | "IT">("IT");
 
   async function load() {
     setLoading(true);
@@ -64,19 +63,6 @@ export default function NotificationsManager() {
     else await load();
   }
 
-  async function sendTest() {
-    try {
-      const reason = testRole === "IT" ? "IT" : "Admin";
-      await fetch("/api/notifications/dispatch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticket: { ticket_no: 9999, reason, submitted_by_name: "Test", submitted_by_email: "test@example.com" } }),
-      });
-      alert("Test notification dispatched (check email/SMS)");
-    } catch {
-      alert("Failed to send test");
-    }
-  }
 
   async function toggleEnabled(id: string, next: boolean) {
     const res = await fetch(`/api/notifications/recipients/${id}`, {
@@ -168,13 +154,7 @@ export default function NotificationsManager() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <select className="input w-auto" value={testRole} onChange={(e) => setTestRole(e.target.value as any)}>
-          <option>IT</option>
-          <option>Admin</option>
-        </select>
-        <button className="btn" type="button" onClick={sendTest}>Send Test Notification</button>
-      </div>
+      {/* Test notification removed as requested */}
     </div>
   );
 }
