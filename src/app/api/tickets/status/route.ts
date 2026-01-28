@@ -14,6 +14,14 @@ function normalizePhone(raw: string | null | undefined): string | null {
   return null;
 }
 
+function teamForReason(reason: string | null | undefined): string {
+  const key = String(reason ?? "").trim().toLowerCase();
+  if (key === "it") return "IT Team";
+  if (key === "admin") return "Admin Team";
+  if (key === "bank") return "Admin Team"; // treat bank as admin-owned comms
+  return "Support";
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -29,17 +37,24 @@ export async function POST(req: Request) {
     // Fetch recipients before update
       const { data: rows, error: fetchErr } = await supabase
         .from("contact_requests")
-        .select("ticket_no, submitted_by_email, phone, submitted_by_name, status, reason, amount_to_transfer")
+        .select("ticket_no, submitted_by_email, phone, submitted_by_name, status, reason, amount_to_transfer, bank_customer_name")
       .in("ticket_no", ticketNos);
 
     if (fetchErr) {
       return NextResponse.json({ error: fetchErr.message }, { status: 500 });
     }
 
+    // Determine derived balanced_status from status
+    let balanced_status: string | undefined = undefined;
+    if (status === "Clip Complete") balanced_status = "balanced";
+    else if (status === "Unable to Balance") balanced_status = "unbalanced";
+
     // Perform update
+    const updateObj: any = { status };
+    if (balanced_status !== undefined) updateObj.balanced_status = balanced_status;
     const { error: updErr } = await supabase
       .from("contact_requests")
-      .update({ status })
+      .update(updateObj)
       .in("ticket_no", ticketNos);
     if (updErr) {
       return NextResponse.json({ error: updErr.message }, { status: 500 });
@@ -71,16 +86,36 @@ export async function POST(req: Request) {
 
         // Templates
         let subject = `Your ticket #${String(ticket ?? "").padStart(4, "0")} is now ${status}`;
-        let text = `Hello ${name},\n\nThe status of your ticket #${String(ticket ?? "").padStart(4, "0")} has been updated to: ${status}.\n\nIf you have any questions, reply to this message.\n\nThanks,\nSupport`;
+        const team = teamForReason(reason);
+        let text = `Hello ${name},\n\nThe status of your ticket #${String(ticket ?? "").padStart(4, "0")} has been updated to: ${status}.\n\nIf you have any problem, please raise another ticket.\n\nThanks,\n${team}`;
 
-        const isBank = (reason ?? "").toLowerCase() === "bank";
-        if (isBank && (status === "Pending" || status === "Sent")) {
-          if (status === "Pending") {
-            subject = `Bank transfer request #${String(ticket ?? "").padStart(4, "0")} received`;
-            text = `Hello ${name},\n\nWe've received your bank transfer request (ticket #${String(ticket ?? "").padStart(4, "0")} ). Our team is processing this now. We'll notify you as soon as the transfer has been sent.${amountText ? `\n\nRequested amount: ${amountText}` : ""}\n\nThanks,\nAccounts`;
-          } else if (status === "Sent") {
+        const reasonLower = (reason ?? "").toLowerCase();
+        const isBank = reasonLower === "bank";
+        const isAgentPayIn = reasonLower === "agent pay in";
+        if (isBank && (status === "Sent" || status === "Incorrect Details")) {
+          const bankNameRaw = (r as any).bank_customer_name as string | null;
+          const bankName = bankNameRaw && bankNameRaw.toString().trim() ? bankNameRaw.toString().trim() : null;
+          const customerRef = bankName ?? "your account";
+          if (status === "Sent") {
             subject = `Bank transfer #${String(ticket ?? "").padStart(4, "0")} sent`;
-            text = `Hello ${name},\n\nYour bank transfer request (ticket #${String(ticket ?? "").padStart(4, "0")} ) has been sent.${amountText ? `\n\nAmount sent: ${amountText}` : ""}\n\nPlease allow standard banking times for funds to appear.\n\nThanks,\nAccounts`;
+            text = `Hello ${name},\n\nYour bank transfer request for ${customerRef} has been sent.${amountText ? `\n\nAmount sent: ${amountText}` : ""}\n\nThanks,\nAdmin Team`;
+          } else if (status === "Incorrect Details") {
+            subject = `Bank transfer request #${String(ticket ?? "").padStart(4, "0")} needs attention`;
+            text = `Hello ${name},\n\nWe couldn't process your bank transfer request for ${customerRef} because some details appear incorrect.\n\nPlease check the account name, account number, sort code and amount, then submit a new request.\n\nThanks,\nAdmin Team`;
+          }
+        }
+
+        // Agent Pay In custom templates
+        if (isAgentPayIn && (status === "Clip Complete" || status === "Unable to Balance")) {
+          if (status === "Clip Complete") {
+            subject = `Clip complete for ticket #${String(ticket ?? "").padStart(4, "0")}`;
+            text = `Hello ${name},\n\nYour clip is complete and balanced. You can now use it.\n\nThanks,\nAdmin Team`;
+          } else if (status === "Unable to Balance") {
+            const custom = (body?.customMessage ?? "").toString().trim();
+            subject = `Unable to balance your clip`;
+            text = custom
+              ? `Hello ${name},\n\n${custom}\n\nThanks,\nAdmin Team`
+              : `Hello ${name},\n\nWe were unable to balance your clip. Please review and provide any missing details so we can assist further.\n\nThanks,\nAdmin Team`;
           }
         }
 

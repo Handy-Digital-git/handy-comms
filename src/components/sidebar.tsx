@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Wrench, Shield, Banknote } from "lucide-react";
+import { LayoutDashboard, Wrench, Shield, Banknote, Megaphone, User } from "lucide-react";
 
 const nav = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "IT Tickets", href: "/tickets", icon: Wrench },
   { name: "Admin Tickets", href: "/admin", icon: Shield },
   { name: "Bank Transfers", href: "/bank-transfers", icon: Banknote },
+  { name: "Agent Pay In", href: "/agent-pay-in", icon: User },
+  { name: "Comms", href: "/comms", icon: Megaphone },
 ];
 
 export function Sidebar({

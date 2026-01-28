@@ -205,17 +205,65 @@ export default function TicketsTable({ items }: { items: ContactRequestRow[] }) 
     }
   };
 
+  // Bulk delete
+  const [deleting, setDeleting] = useState(false);
+  const onBulkDelete = async () => {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    const ok = confirm(`Delete ${ids.length} ticket${ids.length > 1 ? "s" : ""}? This cannot be undone.`);
+    if (!ok) return;
+    try {
+      setDeleting(true);
+      const res = await fetch("/api/tickets/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticketNos: ids }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || "Failed to delete tickets");
+      }
+      setRows((prev) => prev.filter((r) => !(r.ticket_no != null && selected.has(r.ticket_no))));
+      setSelected(new Set());
+    } catch (e: any) {
+      console.error(e);
+      alert(e?.message ?? "Failed to delete tickets");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const colCount = 12; // checkbox + 10 columns + toggle column
 
   return (
     <div className="w-full rounded-xl border border-border bg-bg shadow-sm overflow-hidden">
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="text-sm text-muted">{selected.size} selected</div>
-        <BulkStatusMenu
-          disabled={selected.size === 0 || saving}
-          saving={saving}
-          onSelect={onBulkChange}
-        />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={selected.size === 0 || deleting}
+            onClick={onBulkDelete}
+            className={[
+              "inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm",
+              selected.size === 0 || deleting ? "border-border bg-card text-muted opacity-60" : "border-border bg-card hover:bg-card2 text-rose-600",
+            ].join(" ")}
+            title="Delete selected"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              <path d="M10 11v6M14 11v6" />
+              <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+            </svg>
+            {deleting ? "Deleting…" : "Delete"}
+          </button>
+          <BulkStatusMenu
+            disabled={selected.size === 0 || saving}
+            saving={saving}
+            onSelect={onBulkChange}
+          />
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full table-auto text-left text-[13px]">

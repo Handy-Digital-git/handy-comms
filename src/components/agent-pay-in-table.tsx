@@ -2,19 +2,15 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
-export type BankTransferRow = {
+export type AgentPayInRow = {
   ticket_no: number | null;
   submitted_by_name: string | null;
   submitted_by_email: string | null;
   phone: string | null;
   created_at?: string | null;
-  // Bank-specific fields
-  bank_customer_name?: string | null;
-  bank_account_number?: string | null;
-  bank_sort_code?: string | null;
-  bank_amount?: string | number | null;
-  bank_esb_amount?: string | number | null;
-  amount_to_transfer?: string | number | null;
+  // Balanced info
+  balanced_status?: string | null;
+  reason_unbalanced?: string | null;
   // Optional status for updates
   status?: string | null;
 };
@@ -42,13 +38,6 @@ function formatPhone(phone: string | null | undefined): string {
   return "+44" + p;
 }
 
-function money(x: string | number | null | undefined): string {
-  if (x == null) return "N/A";
-  const n = Number(x);
-  if (!isFinite(n)) return val(x as any);
-  return `£${n.toFixed(2)}`;
-}
-
 function pad(n: number) {
   return n.toString().padStart(2, "0");
 }
@@ -74,7 +63,7 @@ function formatCreated(iso: string | null | undefined): string {
   return `${dd}-${mm}-${yyyy} ${hh}:${min}`;
 }
 
-// Bank transfers statuses
+// Statuses
 export type TicketStatus = "Clip Complete" | "Unable to Balance";
 
 function BulkStatusMenu({ disabled, onSelect, saving }: { disabled: boolean; onSelect: (s: TicketStatus) => void; saving: boolean }) {
@@ -128,8 +117,8 @@ function BulkStatusMenu({ disabled, onSelect, saving }: { disabled: boolean; onS
   );
 }
 
-export default function BankTransfersTable({ items }: { items: BankTransferRow[] }) {
-  const [rows, setRows] = useState<BankTransferRow[]>(items);
+export default function AgentPayInTable({ items }: { items: AgentPayInRow[] }) {
+  const [rows, setRows] = useState<AgentPayInRow[]>(items);
   useEffect(() => setRows(items), [items]);
 
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -144,8 +133,6 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
   const [pendingStatus, setPendingStatus] = useState<TicketStatus | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
   const onBulkChange = async (next: TicketStatus, customMessage?: string) => {
     const ids = Array.from(selected);
     if (ids.length === 0) return;
@@ -160,7 +147,8 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
         const j = await res.json().catch(() => ({}));
         throw new Error(j.error || "Failed to update status");
       }
-      setRows((prev) => prev.map((r) => (r.ticket_no != null && selected.has(r.ticket_no) ? { ...r, status: next } : r)));
+      const newBalanced = next === "Clip Complete" ? "balanced" : next === "Unable to Balance" ? "unbalanced" : undefined;
+      setRows((prev) => prev.map((r) => (r.ticket_no != null && selected.has(r.ticket_no) ? { ...r, status: next, balanced_status: newBalanced ?? r.balanced_status } : r)));
       setSelected(new Set());
     } catch (e: any) {
       console.error(e);
@@ -170,6 +158,8 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
     }
   };
 
+  // Bulk delete
+  const [deleting, setDeleting] = useState(false);
   const onBulkDelete = async () => {
     const ids = Array.from(selected);
     if (ids.length === 0) return;
@@ -198,6 +188,26 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
 
   return (
     <div className="w-full rounded-xl border border-border bg-bg shadow-sm overflow-hidden">
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-4 shadow-lg">
+            <h3 className="text-base font-semibold mb-2">Send custom message</h3>
+            <p className="text-sm text-muted mb-2">This message will be sent with the "Unable to Balance" status.</p>
+            <textarea className="textarea w-full" rows={6} value={modalMsg} onChange={(e) => setModalMsg(e.target.value)} placeholder="Type your message…" />
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button className="btn-ghost" onClick={() => { setModalOpen(false); setModalMsg(""); setPendingStatus(null); }}>Cancel</button>
+              <button className="btn" onClick={() => {
+                const s = pendingStatus ?? "Unable to Balance";
+                onBulkChange(s, modalMsg.trim() || undefined).then(() => {
+                  setModalOpen(false);
+                  setModalMsg("");
+                  setPendingStatus(null);
+                });
+              }}>Send</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="text-sm text-muted">{selected.size} selected</div>
         <div className="flex items-center gap-2">
@@ -224,8 +234,9 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
             saving={saving}
             onSelect={(s) => {
               if (s === "Unable to Balance") {
-                setPendingStatus(s);
+                // Open modal to collect custom message
                 setModalOpen(true);
+                setPendingStatus(s);
               } else {
                 onBulkChange(s);
               }
@@ -233,27 +244,6 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
           />
         </div>
       </div>
-
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-4 shadow-lg">
-            <h3 className="text-base font-semibold mb-2">Send custom message</h3>
-            <p className="text-sm text-muted mb-2">This message will be sent with the "Unable to Balance" status.</p>
-            <textarea className="textarea w-full" rows={6} value={modalMsg} onChange={(e) => setModalMsg(e.target.value)} placeholder="Type your message…" />
-            <div className="mt-3 flex items-center justify-end gap-2">
-              <button className="btn-ghost" onClick={() => { setModalOpen(false); setModalMsg(""); setPendingStatus(null); }}>Cancel</button>
-              <button className="btn" onClick={() => {
-                const s = pendingStatus ?? "Unable to Balance";
-                onBulkChange(s, modalMsg.trim() || undefined).then(() => {
-                  setModalOpen(false);
-                  setModalMsg("");
-                  setPendingStatus(null);
-                });
-              }}>Send</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="overflow-x-auto">
         <table className="w-full table-auto text-left text-[13px]">
@@ -269,7 +259,7 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
                     if (el) el.indeterminate = someSelected;
                   }}
                   onChange={(e) => {
-                    if (e.currentTarget.checked) setSelected(new Set(selectableIds));
+                    if ((e.currentTarget as HTMLInputElement).checked) setSelected(new Set(selectableIds));
                     else setSelected(new Set());
                   }}
                 />
@@ -278,12 +268,8 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
               <th className="px-2 py-5 text-[14px] font-semibold">Name</th>
               <th className="px-2 py-5 text-[14px] font-semibold">Email</th>
               <th className="px-2 py-5 text-[14px] font-semibold">Phone</th>
-              <th className="px-2 py-5 text-[14px] font-semibold">Customer Name</th>
-              <th className="px-2 py-5 text-[14px] font-semibold">Acc Number</th>
-              <th className="px-2 py-5 text-[14px] font-semibold">Sort Code</th>
-              <th className="px-2 py-5 text-[14px] font-semibold">Amount</th>
-              <th className="px-2 py-5 text-[14px] font-semibold">ESB Amount</th>
-              <th className="px-2 py-5 text-[14px] font-semibold">Transfer</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Balanced Status</th>
+              <th className="px-2 py-5 text-[14px] font-semibold">Unbalanced Reason</th>
               <th className="px-2 py-5 text-[14px] font-semibold">Created</th>
               <th className="px-2 py-5 text-[14px] font-semibold">Status</th>
             </tr>
@@ -296,28 +282,12 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
               const st = stRaw || "—";
               const badge = (() => {
                 if (st === "Clip Complete") {
-                  return {
-                    bg: "#F0FDF4",
-                    border: "#BBF7D0",
-                    color: "#166534",
-                    dot: "#22C55E",
-                  };
+                  return { bg: "#F0FDF4", border: "#BBF7D0", color: "#166534", dot: "#22C55E" };
                 }
                 if (st === "Unable to Balance") {
-                  return {
-                    bg: "#FEF2F2",
-                    border: "#FECACA",
-                    color: "#991B1B",
-                    dot: "#EF4444",
-                  };
+                  return { bg: "#FEF2F2", border: "#FECACA", color: "#991B1B", dot: "#EF4444" };
                 }
-                // Unknown or unset -> neutral badge
-                return {
-                  bg: "#F3F4F6",
-                  border: "#E5E7EB",
-                  color: "#374151",
-                  dot: "#9CA3AF",
-                };
+                return { bg: "#F3F4F6", border: "#E5E7EB", color: "#374151", dot: "#9CA3AF" };
               })();
               return (
                 <Fragment key={`${t.ticket_no ?? i}`}>
@@ -345,12 +315,25 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
                     <td className="px-2 py-2 align-middle truncate">{val(t.submitted_by_name)}</td>
                     <td className="px-2 py-2 align-middle text-muted truncate">{val(t.submitted_by_email)}</td>
                     <td className="px-2 py-2 align-middle text-muted truncate">{formatPhone(t.phone)}</td>
-                    <td className="px-2 py-2 align-middle truncate">{val(t.bank_customer_name)}</td>
-                    <td className="px-2 py-2 align-middle text-muted truncate">{val(t.bank_account_number)}</td>
-                    <td className="px-2 py-2 align-middle text-muted truncate">{val(t.bank_sort_code)}</td>
-                    <td className="px-2 py-2 align-middle">{money(t.bank_amount)}</td>
-                    <td className="px-2 py-2 align-middle">{money(t.bank_esb_amount)}</td>
-                    <td className="px-2 py-2 align-middle">{money(t.amount_to_transfer)}</td>
+                    <td className="px-2 py-2 align-middle truncate">
+                      {(() => {
+                        const bs = (t.balanced_status ?? "").toString().trim();
+                        const key = bs.toLowerCase();
+                        const color = key === "balanced" || key === "clip complete" || key === "complete" || key === "yes"
+                          ? { bg: "#F0FDF4", border: "#BBF7D0", color: "#166534", dot: "#22C55E" }
+                          : key === "unbalanced" || key === "unable to balance" || key === "no"
+                          ? { bg: "#FEF2F2", border: "#FECACA", color: "#991B1B", dot: "#EF4444" }
+                          : { bg: "#FFFBEB", border: "#FDE68A", color: "#92400E", dot: "#F59E0B" };
+                        const text = bs || "N/A";
+                        return (
+                          <span className="badge border" style={{ backgroundColor: color.bg, borderColor: color.border, color: color.color }}>
+                            <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: color.dot }} />
+                            {text}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-2 py-2 align-middle text-muted truncate">{val(t.reason_unbalanced)}</td>
                     <td className="px-2 py-2 align-middle text-muted">{formatCreated(t.created_at)}</td>
                     <td className="px-2 py-2 align-middle">
                       <span className="badge border" style={{ backgroundColor: badge.bg, borderColor: badge.border, color: badge.color }}>
