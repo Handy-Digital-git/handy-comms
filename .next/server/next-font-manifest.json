@@ -1,0 +1,51 @@
+{
+  "app": {
+    "[project]/src/app/(auth)/login/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/(protected)/admin/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/(protected)/agent-pay-in/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/(protected)/bank-transfers/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/(protected)/comms/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/(protected)/dashboard/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/(protected)/search/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/(protected)/settings/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/(protected)/tickets/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/_not-found/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ],
+    "[project]/src/app/page": [
+      "static/media/f06bf9da926bae75-s.p.c68a79fb.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

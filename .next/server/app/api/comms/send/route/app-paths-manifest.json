@@ -1,0 +1,3 @@
+{
+  "/api/comms/send/route": "app/api/comms/send/route.js"
+}

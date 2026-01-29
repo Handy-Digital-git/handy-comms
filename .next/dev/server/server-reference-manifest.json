@@ -1,0 +1,56 @@
+{
+  "node": {
+    "00b02d933a1b33737eea4f502b22b1f19f3b157481": {
+      "workers": {
+        "app/(protected)/admin/page": {
+          "moduleId": "[project]/.next-internal/server/app/(protected)/admin/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/(protected)/layout.tsx [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/(protected)/layout.tsx"
+        },
+        "app/(protected)/agent-pay-in/page": {
+          "moduleId": "[project]/.next-internal/server/app/(protected)/agent-pay-in/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/(protected)/layout.tsx [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/(protected)/layout.tsx"
+        },
+        "app/(protected)/bank-transfers/page": {
+          "moduleId": "[project]/.next-internal/server/app/(protected)/bank-transfers/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/(protected)/layout.tsx [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/(protected)/layout.tsx"
+        },
+        "app/(protected)/comms/page": {
+          "moduleId": "[project]/.next-internal/server/app/(protected)/comms/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/(protected)/layout.tsx [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/(protected)/layout.tsx"
+        },
+        "app/(protected)/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/(protected)/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/(protected)/layout.tsx [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/(protected)/layout.tsx"
+        },
+        "app/(protected)/tickets/page": {
+          "moduleId": "[project]/.next-internal/server/app/(protected)/tickets/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/(protected)/layout.tsx [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/(protected)/layout.tsx"
+        }
+      },
+      "layer": {
+        "app/(protected)/admin/page": "rsc",
+        "app/(protected)/agent-pay-in/page": "rsc",
+        "app/(protected)/bank-transfers/page": "rsc",
+        "app/(protected)/comms/page": "rsc",
+        "app/(protected)/dashboard/page": "rsc",
+        "app/(protected)/tickets/page": "rsc"
+      },
+      "filename": "src/app/(protected)/layout.tsx",
+      "exportedName": "$$RSC_SERVER_ACTION_0"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "8APVM2q5zTA4QnvLFKTyQEN8o/x4OxNVt82tGyJZ7Ys="
+}

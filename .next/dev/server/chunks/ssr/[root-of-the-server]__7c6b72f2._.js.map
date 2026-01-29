@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///Users/roberthill/Dev/comms-dash/src/app/%28protected%29/settings/page.tsx"],"sourcesContent":["export default function SettingsPage() {\n  return (\n    <div className=\"space-y-2\">\n      <h1 className=\"text-2xl font-semibold\">Settings</h1>\n      <p className=\"muted\">Configure your profile and workspace preferences.</p>\n    </div>\n  );\n}\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,sQAAC;QAAI,WAAU;;0BACb,sQAAC;gBAAG,WAAU;0BAAyB;;;;;;0BACvC,sQAAC;gBAAE,WAAU;0BAAQ;;;;;;;;;;;;AAG3B"}}]
+}

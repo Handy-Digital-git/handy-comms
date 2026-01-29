@@ -1,0 +1,20 @@
+{
+  "node": {
+    "001bec7bdbdd308e079c25801e29c23fb0491ef88f": {
+      "workers": {
+        "app/(protected)/bank-transfers/page": {
+          "moduleId": 63980,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/(protected)/layout.tsx"
+        }
+      },
+      "layer": {
+        "app/(protected)/bank-transfers/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/app/(protected)/layout.tsx"
+    }
+  },
+  "edge": {}
+}
