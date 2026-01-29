@@ -1,6 +1,6 @@
 {
   "node": {
-    "001bec7bdbdd308e079c25801e29c23fb0491ef88f": {
+    "00641096abe1b9379f55dbc83b88513f53053b0ea4": {
       "workers": {
         "app/(protected)/admin/page": {
           "moduleId": 11717,
@@ -66,5 +66,5 @@
     }
   },
   "edge": {},
-  "encryptionKey": "nMkVWWF/4OCjuTxgrxLoXNBnIRw6S4Aie84IALOjaIc="
+  "encryptionKey": "aRfnbNPay3xHRDowvAEp7pDeV+63pjD5bb99q+J6CuU="
 }

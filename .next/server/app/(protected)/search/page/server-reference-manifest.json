@@ -1,6 +1,6 @@
 {
   "node": {
-    "001bec7bdbdd308e079c25801e29c23fb0491ef88f": {
+    "00641096abe1b9379f55dbc83b88513f53053b0ea4": {
       "workers": {
         "app/(protected)/search/page": {
           "moduleId": 72488,
