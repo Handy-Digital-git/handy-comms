@@ -14,16 +14,8 @@
 /coverage
 
 # next.js
-/.next/*
-!/.next/routes-manifest.json
-!/.next/build-manifest.json
-!/.next/prerender-manifest.json
-!/.next/images-manifest.json
-!/.next/server/**
-!/.next/static/**
-!/.next/server-reference-manifest.json
+/.next/
 /out/
-
 
 # production
 /build
