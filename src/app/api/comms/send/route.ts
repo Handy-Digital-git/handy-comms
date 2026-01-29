@@ -1,8 +1,16 @@
 export async function POST(req: Request) {
-  console.log("🔥 COMMS SEND ROUTE HIT");
+  let body: any = {};
 
-  return new Response(
-    JSON.stringify({ ok: true, stage: "route-hit" }),
-    { status: 200 }
-  );
+  try {
+    body = await req.json();
+  } catch {
+    return Response.json(
+      { error: "Invalid or missing JSON body" },
+      { status: 400 }
+    );
+  }
+
+  console.log("🔥 COMMS SEND ROUTE HIT", body);
+
+  return Response.json({ ok: true });
 }
