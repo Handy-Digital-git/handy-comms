@@ -75,12 +75,12 @@ function formatCreated(iso: string | null | undefined): string {
 }
 
 // Bank transfers statuses
-export type TicketStatus = "Clip Complete" | "Unable to Balance";
+export type TicketStatus = "Sent" | "Incorrect Details";
 
 function BulkStatusMenu({ disabled, onSelect, saving }: { disabled: boolean; onSelect: (s: TicketStatus) => void; saving: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
-  const options: TicketStatus[] = ["Clip Complete", "Unable to Balance"];
+  const options: TicketStatus[] = ["Sent", "Incorrect Details"];
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -141,9 +141,6 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
   const someSelected = selected.size > 0 && !allSelected;
 
   const [saving, setSaving] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMsg, setModalMsg] = useState("");
-  const [pendingStatus, setPendingStatus] = useState<TicketStatus | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const onBulkChange = async (next: TicketStatus, customMessage?: string) => {
@@ -222,38 +219,10 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
           <BulkStatusMenu
             disabled={selected.size === 0 || saving}
             saving={saving}
-            onSelect={(s) => {
-              if (s === "Unable to Balance") {
-                setPendingStatus(s);
-                setModalOpen(true);
-              } else {
-                onBulkChange(s);
-              }
-            }}
+            onSelect={(s) => onBulkChange(s)}
           />
         </div>
       </div>
-
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-4 shadow-lg">
-            <h3 className="text-base font-semibold mb-2">Send custom message</h3>
-            <p className="text-sm text-muted mb-2">This message will be sent with the "Unable to Balance" status.</p>
-            <textarea className="textarea w-full" rows={6} value={modalMsg} onChange={(e) => setModalMsg(e.target.value)} placeholder="Type your message…" />
-            <div className="mt-3 flex items-center justify-end gap-2">
-              <button className="btn-ghost" onClick={() => { setModalOpen(false); setModalMsg(""); setPendingStatus(null); }}>Cancel</button>
-              <button className="btn" onClick={() => {
-                const s = pendingStatus ?? "Unable to Balance";
-                onBulkChange(s, modalMsg.trim() || undefined).then(() => {
-                  setModalOpen(false);
-                  setModalMsg("");
-                  setPendingStatus(null);
-                });
-              }}>Send</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="overflow-x-auto">
         <table className="w-full table-auto text-left text-[13px]">
@@ -295,7 +264,7 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
               const stRaw = (t.status ?? "").toString().trim();
               const st = stRaw || "—";
               const badge = (() => {
-                if (st === "Clip Complete") {
+                if (st === "Sent") {
                   return {
                     bg: "#F0FDF4",
                     border: "#BBF7D0",
@@ -303,12 +272,12 @@ export default function BankTransfersTable({ items }: { items: BankTransferRow[]
                     dot: "#22C55E",
                   };
                 }
-                if (st === "Unable to Balance") {
+                if (st === "Incorrect Details") {
                   return {
-                    bg: "#FEF2F2",
-                    border: "#FECACA",
-                    color: "#991B1B",
-                    dot: "#EF4444",
+                    bg: "#FEF3C7",
+                    border: "#FDE68A",
+                    color: "#92400E",
+                    dot: "#F59E0B",
                   };
                 }
                 // Unknown or unset -> neutral badge
