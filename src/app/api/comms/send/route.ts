@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+export const runtime = "nodejs";
 import { createClient } from "@/lib/supabase/server";
 import twilio from "twilio";
+
+
 
 function normalizePhone(raw: string | null | undefined): string | null {
   if (!raw) return null;

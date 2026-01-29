@@ -29,6 +29,7 @@
           "originalSource": "/signup"
         }
       ]
-    }
+    },
+    "/api/comms/send": {}
   }
 }

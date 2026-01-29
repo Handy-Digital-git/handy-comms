@@ -1,4 +1,5 @@
 {
+  "/(auth)/login/page": "app/(auth)/login/page.js",
   "/(protected)/admin/page": "app/(protected)/admin/page.js",
   "/(protected)/agent-pay-in/page": "app/(protected)/agent-pay-in/page.js",
   "/(protected)/bank-transfers/page": "app/(protected)/bank-transfers/page.js",

@@ -64,3 +64,5 @@ Import trace:
 [00:48:36.940] Server  LOG     ✓ Compiled in 0ms
 [00:50:42.275] Server  WARN    Error: Route "/dashboard" used `searchParams.range`. `searchParams` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
 [00:51:00.443] Server  WARN    Error: Route "/dashboard" used `searchParams.range`. `searchParams` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:13:54.665] Server  WARN    Error: Route "/dashboard" used `searchParams.range`. `searchParams` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:22:39.666] Server  WARN    Error: Route "/dashboard" used `searchParams.range`. `searchParams` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
